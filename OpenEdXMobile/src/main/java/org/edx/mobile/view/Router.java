@@ -119,8 +119,11 @@ public class Router {
 
     public void showCourseDashboardTabs(Activity activity, Config config, EnrolledCoursesResponse model,
                                         boolean announcements) {
-//        showCourseDashboard(activity, model, announcements);
-        showCourseTabsDashboard(activity, model, announcements);
+        if (config.isTabsDashboardEnabled()) {
+            showCourseTabsDashboard(activity, model, announcements);
+        } else {
+            showCourseDashboard(activity, model, announcements);
+        }
     }
 
     /**

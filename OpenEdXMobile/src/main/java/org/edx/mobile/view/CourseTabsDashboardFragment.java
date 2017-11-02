@@ -9,6 +9,9 @@ import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -24,8 +27,10 @@ import org.edx.mobile.databinding.FragmentCourseTabsDashboardBinding;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
+import org.edx.mobile.module.analytics.AnalyticsRegistry;
 import org.edx.mobile.util.FileUtil;
 import org.edx.mobile.util.ResourceUtil;
+import org.edx.mobile.util.images.ShareUtils;
 import org.edx.mobile.view.adapters.FragmentItemPagerAdapter;
 
 import java.io.IOException;
@@ -45,6 +50,8 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     @InjectExtra(Router.EXTRA_COURSE_DATA)
     private EnrolledCoursesResponse courseData;
 
+    @Inject
+    private AnalyticsRegistry analyticsRegistry;
 
     @NonNull
     public static CourseTabsDashboardFragment newInstance() {
@@ -55,6 +62,17 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setTitle(courseData.getCourse().getName());
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.course_dashboard_menu, menu);
+        if (environment.getConfig().isCourseSharingEnabled()) {
+            menu.findItem(R.id.menu_item_share).setVisible(true);
+        } else {
+            menu.findItem(R.id.menu_item_share).setVisible(false);
+        }
     }
 
     @Override
@@ -105,6 +123,18 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
             }
         });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_share:
+                ShareUtils.showCourseShareMenu(getActivity(), getActivity().findViewById(R.id.menu_item_share),
+                        courseData, analyticsRegistry, environment);
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public List<FragmentItemModel> getTabsFragsList() {

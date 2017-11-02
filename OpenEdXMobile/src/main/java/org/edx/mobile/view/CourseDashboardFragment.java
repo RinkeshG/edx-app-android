@@ -226,6 +226,7 @@ public class CourseDashboardFragment extends BaseFragment {
                 "platform_name",
                 getString(R.string.platform_name)).toString() + "\n" + courseData.getCourse().getCourse_about();
         ShareUtils.showShareMenu(
+                getActivity(),
                 ShareUtils.newShareIntent(shareTextWithPlatformName),
                 getActivity().findViewById(R.id.course_detail_share),
                 new ShareUtils.ShareMenuItemListener() {

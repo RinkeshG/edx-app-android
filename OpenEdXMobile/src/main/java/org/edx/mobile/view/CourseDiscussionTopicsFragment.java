@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SearchView;
 import android.widget.TextView;
 
@@ -33,6 +34,7 @@ import org.edx.mobile.model.api.EnrolledCoursesResponse;
 import org.edx.mobile.util.NetworkUtil;
 import org.edx.mobile.util.SoftKeyboardUtil;
 import org.edx.mobile.view.adapters.DiscussionTopicsAdapter;
+import org.edx.mobile.view.common.TaskProgressCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +44,8 @@ import retrofit2.Call;
 import roboguice.inject.InjectExtra;
 import roboguice.inject.InjectView;
 
-public class CourseDiscussionTopicsFragment extends BaseFragment implements RefreshListener {
+public class CourseDiscussionTopicsFragment extends BaseFragment implements RefreshListener,
+        TaskProgressCallback {
     private static final Logger logger = new Logger(CourseDiscussionTopicsFragment.class.getName());
 
     @InjectView(R.id.discussion_topics_searchview)
@@ -62,6 +65,9 @@ public class CourseDiscussionTopicsFragment extends BaseFragment implements Refr
 
     @Inject
     private Router router;
+
+    @InjectView(R.id.loading_indicator)
+    ProgressBar progressSpinner;
 
     private Call<CourseTopics> getTopicListCall;
 
@@ -152,7 +158,7 @@ public class CourseDiscussionTopicsFragment extends BaseFragment implements Refr
         }
         getTopicListCall = discussionService.getCourseTopics(courseData.getCourse().getId());
         getTopicListCall.enqueue(new ErrorHandlingCallback<CourseTopics>(
-                getActivity(), errorNotification, snackbarErrorNotification, this) {
+                getActivity(), this, errorNotification, snackbarErrorNotification, this) {
             @Override
             protected void onResponse(@NonNull final CourseTopics courseTopics) {
                 logger.debug("GetTopicListTask success=" + courseTopics);
@@ -205,6 +211,20 @@ public class CourseDiscussionTopicsFragment extends BaseFragment implements Refr
     protected void onRevisit() {
         if (NetworkUtil.isConnected(getActivity())) {
             snackbarErrorNotification.hideError();
+        }
+    }
+
+    @Override
+    public void startProcess() {
+        if (progressSpinner != null) {
+            progressSpinner.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    public void finishProcess() {
+        if (progressSpinner != null) {
+            progressSpinner.setVisibility(View.GONE);
         }
     }
 }

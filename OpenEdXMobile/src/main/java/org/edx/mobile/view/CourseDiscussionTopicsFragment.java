@@ -69,6 +69,12 @@ public class CourseDiscussionTopicsFragment extends BaseFragment implements Refr
 
     private SnackbarErrorNotification snackbarErrorNotification;
 
+    public static CourseDiscussionTopicsFragment newInstance() {
+        CourseDiscussionTopicsFragment discussionFragment = new CourseDiscussionTopicsFragment();
+        discussionFragment.setRetainInstance(true);
+        return discussionFragment;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {

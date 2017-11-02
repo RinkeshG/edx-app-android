@@ -231,14 +231,7 @@ public class Router {
 
     public void showCourseTabsDashboard(Activity activity, EnrolledCoursesResponse model,
                                     boolean announcements) {
-        Bundle courseBundle = new Bundle();
-        courseBundle.putSerializable(EXTRA_COURSE_DATA, model);
-        courseBundle.putBoolean(EXTRA_ANNOUNCEMENTS, announcements);
-
-        Intent courseDashboard = new Intent(activity, CourseTabsDashboardActivity.class);
-        courseDashboard.putExtra(EXTRA_BUNDLE, courseBundle);
-        courseDashboard.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        activity.startActivity(courseDashboard);
+        activity.startActivity(CourseTabsDashboardActivity.newIntent(activity, model, announcements));
     }
 
     public void showCourseDiscussionTopics(Activity activity, EnrolledCoursesResponse courseData) {

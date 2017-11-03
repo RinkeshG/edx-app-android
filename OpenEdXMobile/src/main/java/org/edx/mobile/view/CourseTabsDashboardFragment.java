@@ -2,11 +2,14 @@ package org.edx.mobile.view;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -28,10 +31,13 @@ import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
 import org.edx.mobile.module.analytics.AnalyticsRegistry;
+import org.edx.mobile.module.db.DataCallback;
 import org.edx.mobile.util.FileUtil;
+import org.edx.mobile.util.NetworkUtil;
 import org.edx.mobile.util.ResourceUtil;
 import org.edx.mobile.util.images.ShareUtils;
 import org.edx.mobile.view.adapters.FragmentItemPagerAdapter;
+import org.edx.mobile.view.custom.ProgressWheel;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,13 +51,18 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     private FragmentCourseTabsDashboardBinding binding;
 
     @Inject
-    IEdxEnvironment environment;
+    private IEdxEnvironment environment;
 
     @InjectExtra(Router.EXTRA_COURSE_DATA)
     private EnrolledCoursesResponse courseData;
 
     @Inject
     private AnalyticsRegistry analyticsRegistry;
+
+    private ProgressWheel progressWheel;
+    private MenuItem progressMenuItem;
+    final private Handler handler = new Handler(Looper.getMainLooper());
+    private Runnable updateDownloadProgressRunnable;
 
     @NonNull
     public static CourseTabsDashboardFragment newInstance() {
@@ -73,6 +84,7 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         } else {
             menu.findItem(R.id.menu_item_share).setVisible(false);
         }
+        handleDownloadProgressMenuItem(menu);
     }
 
     @Override
@@ -131,9 +143,76 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             case R.id.menu_item_share:
                 ShareUtils.showCourseShareMenu(getActivity(), getActivity().findViewById(R.id.menu_item_share),
                         courseData, analyticsRegistry, environment);
+                //TODO: Remove this after testing
+                environment.getRouter().showCourseDashboard(getActivity(), courseData, false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (updateDownloadProgressRunnable != null) {
+            updateDownloadProgressRunnable.run();
+        }
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (updateDownloadProgressRunnable != null) {
+            handler.removeCallbacks(updateDownloadProgressRunnable);
+        }
+    }
+
+    public void handleDownloadProgressMenuItem(Menu menu) {
+        MenuItem newProgressMenuItem = menu.findItem(R.id.menu_item_download_progress);
+        View progressView = newProgressMenuItem.getActionView();
+        ProgressWheel newProgressWheel = (ProgressWheel)
+                progressView.findViewById(R.id.progress_wheel);
+        if (progressMenuItem != null) {
+            newProgressMenuItem.setVisible(progressMenuItem.isVisible());
+            newProgressWheel.setProgress(progressWheel.getProgress());
+        }
+        progressMenuItem = newProgressMenuItem;
+        progressWheel = newProgressWheel;
+        progressView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                environment.getRouter().showDownloads(getActivity());
+            }
+        });
+        if (updateDownloadProgressRunnable == null) {
+            updateDownloadProgressRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (!NetworkUtil.isConnected(getContext()) ||
+                            !environment.getDatabase().isAnyVideoDownloading(null)) {
+                        progressMenuItem.setVisible(false);
+                    } else {
+                        progressMenuItem.setVisible(true);
+                        environment.getStorage().getAverageDownloadProgress(
+                                new DataCallback<Integer>() {
+                                    @Override
+                                    public void onResult(Integer result) {
+                                        int progressPercent = result;
+                                        if (progressPercent >= 0 && progressPercent <= 100) {
+                                            progressWheel.setProgressPercent(progressPercent);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onFail(Exception ex) {
+                                        logger.error(ex);
+                                    }
+                                });
+                    }
+                    handler.postDelayed(this, DateUtils.SECOND_IN_MILLIS);
+                }
+            };
+            updateDownloadProgressRunnable.run();
         }
     }
 

@@ -74,6 +74,7 @@ public class Config {
     private static final String WHATS_NEW_ENABLED = "WHATS_NEW_ENABLED";
     private static final String MY_VIDEOS_ENABLED = "MY_VIDEOS_ENABLED";
     private static final String COURSE_VIDEOS_ENABLED = "COURSE_VIDEOS_ENABLED";
+    private static final String TABS_DASHBOARD_ENABLED = "TABS_DASHBOARD_ENABLED";
 
 
     public static class ZeroRatingConfig {
@@ -590,6 +591,10 @@ public class Config {
 
     public boolean isCourseVideosEnabled() {
         return getBoolean(COURSE_VIDEOS_ENABLED, false);
+    }
+
+    public boolean isTabsDashboardEnabled() {
+        return getBoolean(TABS_DASHBOARD_ENABLED, false);
     }
 
     @NonNull

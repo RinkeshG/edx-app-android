@@ -85,11 +85,11 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
     public void initializeTabs() {
         // Get Frags list
-        final List<FragmentItemModel> frags = getTabsFragsList();
+        final List<FragmentItemModel> fragmentItems = getTabFragments();
         // Init tabs
         final TabLayout tabLayout = binding.tabLayout;
         TabLayout.Tab tab;
-        for (FragmentItemModel fragmentItem : frags) {
+        for (FragmentItemModel fragmentItem : fragmentItems) {
             tab = tabLayout.newTab();
             IconDrawable iconDrawable = new IconDrawable(getContext(), fragmentItem.getIcon());
             iconDrawable.colorRes(getContext(), R.color.edx_brand_primary_base);
@@ -98,13 +98,13 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             tabLayout.addTab(tab);
         }
         // Init view pager
-        final FragmentItemPagerAdapter adapter = new FragmentItemPagerAdapter(this.getActivity().getSupportFragmentManager(), frags);
+        final FragmentItemPagerAdapter adapter = new FragmentItemPagerAdapter(this.getActivity().getSupportFragmentManager(), fragmentItems);
         binding.viewPager.setAdapter(adapter);
         binding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                getActivity().setTitle(frags.get(position).getTitle());
+                getActivity().setTitle(fragmentItems.get(position).getTitle());
             }
         });
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -137,14 +137,25 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         }
     }
 
-    public List<FragmentItemModel> getTabsFragsList() {
-        ArrayList<FragmentItemModel> frags = new ArrayList<>();
-        frags.add(new FragmentItemModel(new TestFragment(), courseData.getCourse().getName(), FontAwesomeIcons.fa_list_alt));
-        frags.add(new FragmentItemModel(new TestFragment(), "Videos", FontAwesomeIcons.fa_film));
-        frags.add(new FragmentItemModel(CourseDiscussionTopicsFragment.newInstance(), "Discussions", FontAwesomeIcons.fa_comments_o));
-        frags.add(new FragmentItemModel(getCourseDatesFragment(), "Important Dates", FontAwesomeIcons.fa_calendar));
-        frags.add(new FragmentItemModel(AdditionalResourcesFragment.newInstance(), "Additional Resources", FontAwesomeIcons.fa_ellipsis_h));
-        return frags;
+    public List<FragmentItemModel> getTabFragments() {
+        ArrayList<FragmentItemModel> fragments = new ArrayList<>();
+        fragments.add(new FragmentItemModel(new TestFragment(), courseData.getCourse().getName(), FontAwesomeIcons.fa_list_alt));
+        if (environment.getConfig().isCourseVideosEnabled()) {
+            fragments.add(new FragmentItemModel(new TestFragment(),
+                    getResources().getString(R.string.videos_title), FontAwesomeIcons.fa_film));
+        }
+        if (environment.getConfig().isDiscussionsEnabled() &&
+                !TextUtils.isEmpty(courseData.getCourse().getDiscussionUrl())) {
+            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.newInstance(),
+                    getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o));
+        }
+        if (environment.getConfig().isCourseDatesEnabled()) {
+            fragments.add(new FragmentItemModel(getCourseDatesFragment(),
+                    getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar));
+        }
+        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.newInstance(),
+                getResources().getString(R.string.additional_resources_title), FontAwesomeIcons.fa_ellipsis_h));
+        return fragments;
     }
 
     public Fragment getCourseDatesFragment() {

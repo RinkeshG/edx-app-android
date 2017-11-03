@@ -175,6 +175,8 @@
     <string name="announcement_title">Announcements</string>
     <!-- Title text for the important dates section on the course dashboard  -->
     <string name="course_dates_title">Important Dates</string>
+    <!-- Title text for the additional resources section on the tabular course dashboard  -->
+    <string name="additional_resources_title">Additional Resources</string>
     <!-- Row of announcement on dashboard screen -->
     <!-- NOTE: TODO - not final one -->
     <string name="announcement_subtitle">Keep up with the latest news</string>

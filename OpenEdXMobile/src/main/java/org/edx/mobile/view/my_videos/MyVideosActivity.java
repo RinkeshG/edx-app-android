@@ -9,7 +9,7 @@ import android.view.WindowManager;
 
 import org.edx.mobile.R;
 import org.edx.mobile.base.BaseVideosDownloadStateActivity;
-import org.edx.mobile.model.Item;
+import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.module.analytics.Analytics;
 import org.edx.mobile.view.adapters.StaticFragmentPagerAdapter;
 
@@ -48,9 +48,9 @@ public class MyVideosActivity extends BaseVideosDownloadStateActivity {
     private void initializeTabs() {
         ViewPager pager = (ViewPager) findViewById(R.id.pager);
         adapter = new StaticFragmentPagerAdapter(getSupportFragmentManager(),
-                new Item(MyAllVideosFragment.class,
+                new FragmentItemModel(MyAllVideosFragment.class,
                         getText(R.string.my_all_videos)),
-                new Item(MyRecentVideosFragment.class,
+                new FragmentItemModel(MyRecentVideosFragment.class,
                         getText(R.string.my_recent_videos))
         );
         pager.setAdapter(adapter);

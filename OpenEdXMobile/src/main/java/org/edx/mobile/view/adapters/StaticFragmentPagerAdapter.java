@@ -6,7 +6,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.view.ViewGroup;
 
-import org.edx.mobile.model.Item;
+import org.edx.mobile.model.FragmentItemModel;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,16 +21,16 @@ import java.util.Map;
  */
 public class StaticFragmentPagerAdapter extends FragmentPagerAdapter {
     @NonNull
-    private List<Item> items = Collections.emptyList();
+    private List<FragmentItemModel> items = Collections.emptyList();
     @NonNull
     private final Map<Integer, Fragment> positionToFragment = new HashMap<>();
 
-    public StaticFragmentPagerAdapter(@NonNull FragmentManager manager, @NonNull Item... items) {
+    public StaticFragmentPagerAdapter(@NonNull FragmentManager manager, @NonNull FragmentItemModel... items) {
         super(manager);
         setItems(Arrays.asList(items));
     }
 
-    public void setItems(@NonNull List<Item> items) {
+    public void setItems(@NonNull List<FragmentItemModel> items) {
         this.items = new LinkedList<>(items);
         notifyDataSetChanged();
     }

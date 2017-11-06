@@ -218,21 +218,23 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
     public List<FragmentItemModel> getTabFragments() {
         ArrayList<FragmentItemModel> fragments = new ArrayList<>();
-        fragments.add(new FragmentItemModel(new TestFragment(), courseData.getCourse().getName(), FontAwesomeIcons.fa_list_alt));
+        fragments.add(new FragmentItemModel(TestFragment.class, null, courseData.getCourse().getName(),
+                FontAwesomeIcons.fa_list_alt));
         if (environment.getConfig().isCourseVideosEnabled()) {
-            fragments.add(new FragmentItemModel(new TestFragment(),
+            fragments.add(new FragmentItemModel(TestFragment.class, null,
                     getResources().getString(R.string.videos_title), FontAwesomeIcons.fa_film));
         }
         if (environment.getConfig().isDiscussionsEnabled() &&
                 !TextUtils.isEmpty(courseData.getCourse().getDiscussionUrl())) {
-            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.newInstance(),
+            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class, null,
                     getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o));
         }
         if (environment.getConfig().isCourseDatesEnabled()) {
-            fragments.add(new FragmentItemModel(getCourseDatesFragment(),
+            //TODO: Update following fragment declaration
+            fragments.add(new FragmentItemModel(TestFragment.class, null,
                     getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar));
         }
-        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.newInstance(),
+        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.class, null,
                 getResources().getString(R.string.additional_resources_title), FontAwesomeIcons.fa_ellipsis_h));
         return fragments;
     }

@@ -45,6 +45,9 @@ import java.util.List;
 
 import roboguice.inject.InjectExtra;
 
+import static org.edx.mobile.view.AuthenticatedWebViewFragment.ARG_JAVASCRIPT;
+import static org.edx.mobile.view.AuthenticatedWebViewFragment.ARG_URL;
+
 public class CourseTabsDashboardFragment extends BaseFragment {
     protected final Logger logger = new Logger(getClass().getName());
 
@@ -230,8 +233,7 @@ public class CourseTabsDashboardFragment extends BaseFragment {
                     getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o));
         }
         if (environment.getConfig().isCourseDatesEnabled()) {
-            //TODO: Update following fragment declaration
-            fragments.add(new FragmentItemModel(TestFragment.class, null,
+            fragments.add(new FragmentItemModel(AuthenticatedWebViewFragment.class, getCourseDatesArgs(),
                     getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar));
         }
         fragments.add(new FragmentItemModel(AdditionalResourcesFragment.class, null,
@@ -239,7 +241,7 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         return fragments;
     }
 
-    public Fragment getCourseDatesFragment() {
+    public Bundle getCourseDatesArgs() {
         final StringBuilder courseInfoUrl = new StringBuilder(64);
         courseInfoUrl.append(environment.getConfig().getApiHostURL())
                 .append("/courses/")
@@ -260,7 +262,11 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             // Append function call in javascript
             javascript += functionCall;
         }
-        return AuthenticatedWebViewFragment.newInstance(courseInfoUrl.toString(), javascript);
+
+        final Bundle args = new Bundle();
+        args.putString(ARG_URL, courseInfoUrl.toString());
+        args.putString(ARG_JAVASCRIPT, javascript);
+        return args;
     }
 
     public static class TestFragment extends Fragment {

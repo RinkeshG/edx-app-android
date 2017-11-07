@@ -16,26 +16,34 @@ public class FragmentItemModel {
 
     @NonNull
     private final Class<? extends Fragment> fragmentClass;
-    @Nullable
-    private final Bundle args;
     @NonNull
     private final CharSequence title;
     @Nullable
     private final Icon icon;
+    @Nullable
+    private final Bundle args;
+    @Nullable
+    private FragmentStateListener listener;
 
     public FragmentItemModel(@NonNull Class<? extends Fragment> fragmentClass, @NonNull CharSequence title) {
-        this(fragmentClass, null, title, null);
+        this(fragmentClass, title, null, null, null);
     }
 
-    public FragmentItemModel(@NonNull Class<? extends Fragment> fragmentClass, Bundle args,
-                             @NonNull CharSequence title, Icon icon) {
+    public FragmentItemModel(@NonNull Class<? extends Fragment> fragmentClass,
+                             @NonNull CharSequence title, Icon icon, FragmentStateListener listener) {
+        this(fragmentClass, title, icon, null, listener);
+    }
+
+    public FragmentItemModel(@NonNull Class<? extends Fragment> fragmentClass, @NonNull CharSequence title,
+                             Icon icon, Bundle args, FragmentStateListener listener) {
         if (args != null) {
             args.setClassLoader(fragmentClass.getClassLoader());
         }
         this.fragmentClass = fragmentClass;
-        this.args = args;
         this.title = title;
         this.icon = icon;
+        this.args = args;
+        this.listener = listener;
     }
 
     @NonNull
@@ -46,6 +54,11 @@ public class FragmentItemModel {
     @Nullable
     public Icon getIcon() {
         return icon;
+    }
+
+    @Nullable
+    public FragmentStateListener getListener() {
+        return listener;
     }
 
     public Fragment generateFragment() {
@@ -61,5 +74,9 @@ public class FragmentItemModel {
         }
         fragment.setArguments(args);
         return fragment;
+    }
+
+    public interface FragmentStateListener {
+        void onFragmentSelected();
     }
 }

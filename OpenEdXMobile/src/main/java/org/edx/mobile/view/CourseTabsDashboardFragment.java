@@ -30,6 +30,7 @@ import org.edx.mobile.databinding.FragmentCourseTabsDashboardBinding;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
+import org.edx.mobile.module.analytics.Analytics;
 import org.edx.mobile.module.analytics.AnalyticsRegistry;
 import org.edx.mobile.module.db.DataCallback;
 import org.edx.mobile.util.FileUtil;
@@ -77,6 +78,8 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         getActivity().setTitle(courseData.getCourse().getName());
         setHasOptionsMenu(true);
+        environment.getAnalyticsRegistry().trackScreenView(
+                Analytics.Screens.COURSE_DASHBOARD, courseData.getCourse().getId(), null);
     }
 
     @Override
@@ -119,7 +122,11 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             @Override
             public void onPageSelected(int position) {
                 super.onPageSelected(position);
-                getActivity().setTitle(fragmentItems.get(position).getTitle());
+                final FragmentItemModel item = fragmentItems.get(position);
+                getActivity().setTitle(item.getTitle());
+                if (item.getListener() != null) {
+                    item.getListener().onFragmentSelected();
+                }
             }
         });
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -146,8 +153,6 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             case R.id.menu_item_share:
                 ShareUtils.showCourseShareMenu(getActivity(), getActivity().findViewById(R.id.menu_item_share),
                         courseData, analyticsRegistry, environment);
-                //TODO: Remove this after testing
-                environment.getRouter().showCourseDashboard(getActivity(), courseData, false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -221,23 +226,53 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
     public List<FragmentItemModel> getTabFragments() {
         ArrayList<FragmentItemModel> fragments = new ArrayList<>();
-        fragments.add(new FragmentItemModel(TestFragment.class, null, courseData.getCourse().getName(),
-                FontAwesomeIcons.fa_list_alt));
+        fragments.add(new FragmentItemModel(TestFragment.class, courseData.getCourse().getName(),
+                FontAwesomeIcons.fa_list_alt,
+                new FragmentItemModel.FragmentStateListener() {
+                    @Override
+                    public void onFragmentSelected() {
+                        environment.getAnalyticsRegistry().trackScreenView(Analytics.Screens.COURSE_OUTLINE,
+                                courseData.getCourse().getId(), null);
+                    }
+                }));
         if (environment.getConfig().isCourseVideosEnabled()) {
-            fragments.add(new FragmentItemModel(TestFragment.class, null,
-                    getResources().getString(R.string.videos_title), FontAwesomeIcons.fa_film));
+            fragments.add(new FragmentItemModel(TestFragment.class,
+                    getResources().getString(R.string.videos_title), FontAwesomeIcons.fa_film,
+                    new FragmentItemModel.FragmentStateListener() {
+                        @Override
+                        public void onFragmentSelected() {
+                            environment.getAnalyticsRegistry().trackScreenView(
+                                    Analytics.Screens.VIDEOS_COURSE_VIDEOS, courseData.getCourse().getId(), null);
+                        }
+                    }));
         }
         if (environment.getConfig().isDiscussionsEnabled() &&
                 !TextUtils.isEmpty(courseData.getCourse().getDiscussionUrl())) {
-            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class, null,
-                    getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o));
+            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class,
+                    getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o,
+                    new FragmentItemModel.FragmentStateListener() {
+                        @Override
+                        public void onFragmentSelected() {
+                            environment.getAnalyticsRegistry().trackScreenView(Analytics.Screens.FORUM_VIEW_TOPICS,
+                                    courseData.getCourse().getId(), null, null);
+                        }
+                    }));
         }
         if (environment.getConfig().isCourseDatesEnabled()) {
-            fragments.add(new FragmentItemModel(AuthenticatedWebViewFragment.class, getCourseDatesArgs(),
-                    getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar));
+            fragments.add(new FragmentItemModel(AuthenticatedWebViewFragment.class,
+                    getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar,
+                    getCourseDatesArgs(),
+                    new FragmentItemModel.FragmentStateListener() {
+                        @Override
+                        public void onFragmentSelected() {
+                            analyticsRegistry.trackScreenView(Analytics.Screens.COURSE_DATES,
+                                    courseData.getCourse().getId(), null);
+                        }
+                    }));
         }
-        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.class, null,
-                getResources().getString(R.string.additional_resources_title), FontAwesomeIcons.fa_ellipsis_h));
+        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.class,
+                getResources().getString(R.string.additional_resources_title),
+                FontAwesomeIcons.fa_ellipsis_h, null));
         return fragments;
     }
 

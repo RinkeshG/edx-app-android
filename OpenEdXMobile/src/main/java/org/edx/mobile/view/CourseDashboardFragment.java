@@ -73,7 +73,7 @@ public class CourseDashboardFragment extends BaseFragment {
             courseTextName.setEllipsize(null);
             courseTextName.setSingleLine(false);
         } else {
-            view = inflater.inflate(R.layout.fragment_course_dashboard_disabled, container, false);
+            view = inflater.inflate(R.layout.fragment_dashboard_error_layout, container, false);
             errorText = (TextView) view.findViewById(R.id.error_msg);
         }
         return view;

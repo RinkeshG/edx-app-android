@@ -27,6 +27,7 @@ import org.edx.mobile.R;
 import org.edx.mobile.base.BaseFragment;
 import org.edx.mobile.core.IEdxEnvironment;
 import org.edx.mobile.databinding.FragmentCourseTabsDashboardBinding;
+import org.edx.mobile.databinding.FragmentDashboardErrorLayoutBinding;
 import org.edx.mobile.logger.Logger;
 import org.edx.mobile.model.FragmentItemModel;
 import org.edx.mobile.model.api.EnrolledCoursesResponse;
@@ -52,7 +53,10 @@ import static org.edx.mobile.view.AuthenticatedWebViewFragment.ARG_URL;
 public class CourseTabsDashboardFragment extends BaseFragment {
     protected final Logger logger = new Logger(getClass().getName());
 
+    @Nullable
     private FragmentCourseTabsDashboardBinding binding;
+    @Nullable
+    private FragmentDashboardErrorLayoutBinding errorLayoutBinding;
 
     @Inject
     private IEdxEnvironment environment;
@@ -84,6 +88,9 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        if (!courseData.getCourse().getCoursewareAccess().hasAccess()) {
+            return;
+        }
         inflater.inflate(R.menu.course_dashboard_menu, menu);
         if (environment.getConfig().isCourseSharingEnabled()) {
             menu.findItem(R.id.menu_item_share).setVisible(true);
@@ -96,9 +103,15 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_course_tabs_dashboard, container, false);
-        initializeTabs();
-        return binding.getRoot();
+        if (courseData.getCourse().getCoursewareAccess().hasAccess()) {
+            binding = DataBindingUtil.inflate(inflater, R.layout.fragment_course_tabs_dashboard, container, false);
+            initializeTabs();
+            return binding.getRoot();
+        } else {
+            errorLayoutBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_dashboard_error_layout, container, false);
+            errorLayoutBinding.errorMsg.setText(R.string.course_not_started);
+            return errorLayoutBinding.getRoot();
+        }
     }
 
     public void initializeTabs() {

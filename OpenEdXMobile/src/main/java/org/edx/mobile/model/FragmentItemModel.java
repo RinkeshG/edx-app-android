@@ -8,7 +8,8 @@ import android.support.v4.app.Fragment;
 import com.joanzapata.iconify.Icon;
 
 /**
- * Data class representing a page.
+ * A class containing all data required to {@link android.support.v4.view.PagerAdapter PagerAdapter}
+ * and {@link android.support.design.widget.TabLayout TabLayout} to initialize a fragment/tab.
  */
 public class FragmentItemModel {
     private static String ERROR_MSG_INSTANTIATION = "Unable to instantiate fragment %s: make " +

@@ -115,8 +115,8 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     }
 
     public void initializeTabs() {
-        // Get Frags list
-        final List<FragmentItemModel> fragmentItems = getTabFragments();
+        // Get fragment items list
+        final List<FragmentItemModel> fragmentItems = getFragmentItems();
         // Init tabs
         final TabLayout tabLayout = binding.tabLayout;
         TabLayout.Tab tab;
@@ -128,20 +128,6 @@ public class CourseTabsDashboardFragment extends BaseFragment {
             tab.setContentDescription(fragmentItem.getTitle());
             tabLayout.addTab(tab);
         }
-        // Init view pager
-        final FragmentItemPagerAdapter adapter = new FragmentItemPagerAdapter(this.getActivity().getSupportFragmentManager(), fragmentItems);
-        binding.viewPager.setAdapter(adapter);
-        binding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                final FragmentItemModel item = fragmentItems.get(position);
-                getActivity().setTitle(item.getTitle());
-                if (item.getListener() != null) {
-                    item.getListener().onFragmentSelected();
-                }
-            }
-        });
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
@@ -158,6 +144,24 @@ public class CourseTabsDashboardFragment extends BaseFragment {
 
             }
         });
+        // Init view pager
+        final FragmentItemPagerAdapter adapter = new FragmentItemPagerAdapter(this.getActivity().getSupportFragmentManager(), fragmentItems);
+        binding.viewPager.setAdapter(adapter);
+        binding.viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout) {
+            @Override
+            public void onPageSelected(int position) {
+                super.onPageSelected(position);
+                final FragmentItemModel item = fragmentItems.get(position);
+                getActivity().setTitle(item.getTitle());
+                if (item.getListener() != null) {
+                    item.getListener().onFragmentSelected();
+                }
+            }
+        });
+        // It will load all of the fragments on creation and will stay in memory till view pager
+        // life time, it will greatly improve our user experience as all fragments will be available
+        // to view all the time. We can decrease the limit if creates memory problems on low end devices.
+        binding.viewPager.setOffscreenPageLimit(fragmentItems.size()-1);
     }
 
     @Override
@@ -189,9 +193,9 @@ public class CourseTabsDashboardFragment extends BaseFragment {
     }
 
     public void handleDownloadProgressMenuItem(Menu menu) {
-        MenuItem newProgressMenuItem = menu.findItem(R.id.menu_item_download_progress);
-        View progressView = newProgressMenuItem.getActionView();
-        ProgressWheel newProgressWheel = (ProgressWheel)
+        final MenuItem newProgressMenuItem = menu.findItem(R.id.menu_item_download_progress);
+        final View progressView = newProgressMenuItem.getActionView();
+        final ProgressWheel newProgressWheel = (ProgressWheel)
                 progressView.findViewById(R.id.progress_wheel);
         if (progressMenuItem != null) {
             newProgressMenuItem.setVisible(progressMenuItem.isVisible());
@@ -237,9 +241,10 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         }
     }
 
-    public List<FragmentItemModel> getTabFragments() {
-        ArrayList<FragmentItemModel> fragments = new ArrayList<>();
-        fragments.add(new FragmentItemModel(TestFragment.class, courseData.getCourse().getName(),
+    public List<FragmentItemModel> getFragmentItems() {
+        ArrayList<FragmentItemModel> items = new ArrayList<>();
+        // Add course outline tab
+        items.add(new FragmentItemModel(TestFragment.class, courseData.getCourse().getName(),
                 FontAwesomeIcons.fa_list_alt,
                 new FragmentItemModel.FragmentStateListener() {
                     @Override
@@ -248,8 +253,9 @@ public class CourseTabsDashboardFragment extends BaseFragment {
                                 courseData.getCourse().getId(), null);
                     }
                 }));
+        // Add videos tab
         if (environment.getConfig().isCourseVideosEnabled()) {
-            fragments.add(new FragmentItemModel(TestFragment.class,
+            items.add(new FragmentItemModel(TestFragment.class,
                     getResources().getString(R.string.videos_title), FontAwesomeIcons.fa_film,
                     new FragmentItemModel.FragmentStateListener() {
                         @Override
@@ -259,9 +265,10 @@ public class CourseTabsDashboardFragment extends BaseFragment {
                         }
                     }));
         }
+        // Add discussion tab
         if (environment.getConfig().isDiscussionsEnabled() &&
                 !TextUtils.isEmpty(courseData.getCourse().getDiscussionUrl())) {
-            fragments.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class,
+            items.add(new FragmentItemModel(CourseDiscussionTopicsFragment.class,
                     getResources().getString(R.string.discussion_title), FontAwesomeIcons.fa_comments_o,
                     new FragmentItemModel.FragmentStateListener() {
                         @Override
@@ -271,8 +278,9 @@ public class CourseTabsDashboardFragment extends BaseFragment {
                         }
                     }));
         }
+        // Add important dates tab
         if (environment.getConfig().isCourseDatesEnabled()) {
-            fragments.add(new FragmentItemModel(AuthenticatedWebViewFragment.class,
+            items.add(new FragmentItemModel(AuthenticatedWebViewFragment.class,
                     getResources().getString(R.string.course_dates_title), FontAwesomeIcons.fa_calendar,
                     getCourseDatesArgs(),
                     new FragmentItemModel.FragmentStateListener() {
@@ -283,10 +291,11 @@ public class CourseTabsDashboardFragment extends BaseFragment {
                         }
                     }));
         }
-        fragments.add(new FragmentItemModel(AdditionalResourcesFragment.class,
+        // Add additional resources tab
+        items.add(new FragmentItemModel(AdditionalResourcesFragment.class,
                 getResources().getString(R.string.additional_resources_title),
                 FontAwesomeIcons.fa_ellipsis_h, null));
-        return fragments;
+        return items;
     }
 
     public Bundle getCourseDatesArgs() {
@@ -317,6 +326,7 @@ public class CourseTabsDashboardFragment extends BaseFragment {
         return args;
     }
 
+    //TODO: Remove it once all tab fragments are available to attach
     public static class TestFragment extends Fragment {
         @Nullable
         @Override

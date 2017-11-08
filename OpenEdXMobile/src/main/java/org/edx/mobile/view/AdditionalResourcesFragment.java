@@ -26,15 +26,6 @@ public class AdditionalResourcesFragment extends BaseFragment {
     @InjectExtra(Router.EXTRA_COURSE_DATA)
     private EnrolledCoursesResponse courseData;
 
-    public static AdditionalResourcesFragment newInstance() {
-        AdditionalResourcesFragment fragment = new AdditionalResourcesFragment();
-        return fragment;
-    }
-
-    public AdditionalResourcesFragment() {
-
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

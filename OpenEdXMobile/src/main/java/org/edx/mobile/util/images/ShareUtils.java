@@ -92,7 +92,7 @@ public enum ShareUtils {
     }
 
     /**
-     * Display a popup having a list of shareable apps that can be performed for the given sharing intent.
+     * Display a popup having a list of shareable apps that resolves the given sharing intent.
      *
      * @param activity    Calling activity, pop up style will be based on this activity's style.
      * @param shareIntent Sharing intent

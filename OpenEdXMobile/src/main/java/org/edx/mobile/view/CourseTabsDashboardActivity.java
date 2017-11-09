@@ -11,7 +11,7 @@ import org.edx.mobile.model.api.EnrolledCoursesResponse;
 import static org.edx.mobile.view.Router.EXTRA_ANNOUNCEMENTS;
 import static org.edx.mobile.view.Router.EXTRA_COURSE_DATA;
 
-class CourseTabsDashboardActivity extends BaseSingleFragmentActivity {
+public class CourseTabsDashboardActivity extends BaseSingleFragmentActivity {
     public static Intent newIntent(@NonNull Activity activity,
                                    @NonNull EnrolledCoursesResponse courseData,
                                    boolean announcements) {

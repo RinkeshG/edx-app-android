@@ -77,6 +77,30 @@ public class FragmentItemModel {
         return fragment;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FragmentItemModel that = (FragmentItemModel) o;
+
+        if (!fragmentClass.equals(that.fragmentClass)) return false;
+        if (!title.equals(that.title)) return false;
+        if (icon != null ? !icon.equals(that.icon) : that.icon != null) return false;
+        if (args != null ? !args.equals(that.args) : that.args != null) return false;
+        return listener != null ? listener.equals(that.listener) : that.listener == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = fragmentClass.hashCode();
+        result = 31 * result + title.hashCode();
+        result = 31 * result + (icon != null ? icon.hashCode() : 0);
+        result = 31 * result + (args != null ? args.hashCode() : 0);
+        result = 31 * result + (listener != null ? listener.hashCode() : 0);
+        return result;
+    }
+
     public interface FragmentStateListener {
         void onFragmentSelected();
     }
